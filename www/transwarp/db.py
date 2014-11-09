@@ -38,7 +38,7 @@ class _Engine(object):
 
 
     def connect(self):
-        return self._connect
+        return self._connect()
 
 
 def create_engine(user,password,database,host='127.0.0.1',port=3306,**kw):
@@ -46,6 +46,68 @@ def create_engine(user,password,database,host='127.0.0.1',port=3306,**kw):
     global engine
     if engine is not None:
         raise DBError('Engine is already initalized.')
-    params   = dict(user        = user, password = password, database = database, host                = host, port = port)
+    params   = dict(user = user, password = password, database = database, host= host, port = port)
     defaults = dict(use_unicode = True, charset  = 'utf8', collation  = 'utf8_general_ci', autocommit = False)
-    params[
+    for k, v in defaults.iteritems():
+        params[k] = kw.pop(k, v)
+    params['buffered'] = True
+    engine = _Engine(lambda: mysql.connector.connect(**params))
+    logging.info('Init mysql engine <%s> ok.' % hex(id(engine)))
+
+
+class _LasyConnection(object):
+
+    def __init__(self):
+        self.connection = None
+
+    def cursor(self):
+        if self.connection is None:
+            connection = engine.connect() 
+            logging.info('open connection<%s>...' % hex(id(connection)))
+            self.connection = connection
+        return self.connection.cursor()
+
+    def commit(self):
+        self.connection.commit()
+
+
+    def rollback(self):
+        self.connection.rollback()
+
+
+    def cleanup(self):
+        if self.connection:
+            connection = self.connection
+            self.connection = None
+            logging.info('close connection <%s>...' % hex(id(connection)))
+            connection.close()
+
+
+class _DbCtx(threading.local):
+
+    def __init__(self):
+        self.connection = None
+        self.transactions = 0
+
+    def isInit(self):
+        return not self.connection is None
+
+    def init(self):
+        logging.info('open lasy connection...')
+        self.connection = _LasyConnection()
+        self.transactions = 0
+
+    def cleanup(self):
+        self.connection.cleanup()
+        self.connection = None
+
+
+    def cursor(self):
+        return self.connection.cursor()
+
+
+
+
+if __name__ == '__main__':
+    logging.basicConfig(level=logging.DEBUG)
+    create_engine('root','root','')
