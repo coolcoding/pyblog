@@ -1,0 +1,8 @@
+nginx
+gunicorn
+python-gevent
+supervisor 
+mysql-server
+jinja2
+mysql-connector-python
+fabric
