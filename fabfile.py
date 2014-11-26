@@ -39,6 +39,7 @@ def build():
         cmd      = ['tar','--dereference','-zcvf','../dist/%s' % _TAR_FILE]
         cmd.extend('--exclude=\'%s\'' % ex for ex in excludes)
         cmd.extend(includes)
+        print cmd
         print ' '.join(cmd)
         local(' '.join(cmd))
 
@@ -60,6 +61,7 @@ def deploy():
     with settings(warn_only=True):
         run('/etc/init.d/nginx reload')
         
+
 
 def restore2local():
     '''

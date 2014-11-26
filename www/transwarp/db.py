@@ -199,5 +199,5 @@ def insert(table, **kw):
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
-    create_engine('root','root','falcon')
-    print select('select * from stat limit 3')
+    create_engine('root','root','awesome')
+    print select_one('select * from users')

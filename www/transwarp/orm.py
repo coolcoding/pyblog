@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-__author__ = 'Michael Liao'
 
 '''
 Database operation module. This module is independent with web module.
@@ -298,6 +297,7 @@ class Model(dict):
         pk = self.__primary_key__.name
         args = (getattr(self, pk), )
         db.update('delete from `%s` where `%s`=?' % (self.__table__, pk), *args)
+        print 'delete from `%s` where `%s`=?' % (self.__table__, pk)
         return self
 
     def insert(self):
